@@ -1,0 +1,155 @@
+import { Icon } from "@iconify/react/dist/iconify.js";
+import React from "react";
+
+const DynamicTableBody = ({
+  tableInstance,
+  pagination,
+  handlePageSizeChange,
+  handlePageChange,
+  isLoading,
+}) => {
+  const { getTableProps, getTableBodyProps, headerGroups, prepareRow, rows } = tableInstance;
+
+  return (
+    <div className="min-w-full table-custom-container ">
+      <div className="overflow-x-auto table-custom">
+        <table
+          className="min-w-full divide-y bg-purple-100  divide-slate-100 table-fixed dark:divide-slate-700 table"
+          {...getTableProps()}
+        >
+          <thead className="bg-blue-300 dark:bg-slate-700">
+            {headerGroups.map((headerGroup) => (
+              <tr {...headerGroup.getHeaderGroupProps()} className="!border-b-0">
+                {headerGroup.headers.map((column) => (
+                  <th {...column.getHeaderProps(column.getSortByToggleProps())} className="table-th">
+                    {column.render("Header")}
+                    <span>{column.isSorted ? (column.isSortedDesc ? " 🔽" : " 🔼") : ""}</span>
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody
+            className="bg-white divide-y divide-slate-100 dark:bg-slate-800 dark:divide-slate-700 !border-t-0"
+            {...getTableBodyProps()}
+          >
+            {isLoading ? (
+              <tr>
+                <td colSpan={headerGroups[0].headers.length} className="text-center py-4">
+                  <Icon icon="eos-icons:loading" className="text-3xl text-blue-500 animate-spin mx-auto" />
+                  <p className="text-sm text-gray-500 mt-2">Loading data...</p>
+                </td>
+              </tr>
+            ) : rows.length > 0 ? (
+              rows.map((row) => {
+                prepareRow(row);
+                return (
+                  <tr {...row.getRowProps()}>
+                    {row.cells.map((cell) => (
+                      <td {...cell.getCellProps()} className="table-td">
+                        {cell.render("Cell")}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={headerGroups[0].headers.length} className="text-center py-4">
+                  <p className="text-gray-500">No data available</p>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="md:flex justify-between items-center mt-6">
+        {/* Items Per Page */}
+        <div className="flex items-center space-x-3">
+          <select
+            className="form-control py-2"
+            value={pagination.pageSize}
+            onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+          >
+            {[1, 2, 3, 10, 25, 50, 100].map((size) => (
+              <option key={size} value={size}>
+                Show {size}
+              </option>
+            ))}
+          </select>
+          <span className="text-sm text-slate-600 whitespace-nowrap">
+            Page {pagination.currentPage} of {pagination.totalPages}
+          </span>
+        </div>
+
+        {/* Pagination Buttons */}
+        <ul className="flex items-center space-x-3 rtl:space-x-reverse my-2">
+          <li>
+            <button
+              className={` ${pagination.currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+              onClick={() => handlePageChange(1)}
+              disabled={pagination.currentPage === 1}
+            >
+              <Icon icon="heroicons:chevron-double-left-solid" />
+            </button>
+          </li>
+
+          <li>
+            <button
+              className={` ${pagination.currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+              onClick={() => handlePageChange(Math.max(pagination.currentPage - 1, 0))}
+              disabled={pagination.currentPage === 1}
+            >
+              Prev
+            </button>
+          </li>
+
+          {Array.from({ length: pagination.totalPages }, (_, page) => (
+            <li key={page}>
+              <button
+                className={`${
+                  page === pagination.currentPage - 1
+                    ? "bg-blue-500 dark:bg-slate-600 text-white font-medium"
+                    : "bg-slate-100 dark:bg-slate-700 text-slate-900 font-normal"
+                } text-sm rounded flex h-6 w-6 items-center justify-center transition-all duration-150`}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                {page + 1}
+              </button>
+            </li>
+          ))}
+
+          <li>
+            <button
+              className={` ${
+                pagination.currentPage >= pagination.totalPages ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              onClick={() =>
+                handlePageChange(Math.min(pagination.currentPage + 1, pagination.totalPages - 1))
+              }
+              disabled={pagination.currentPage >= pagination.totalPages}
+            >
+              Next
+            </button>
+          </li>
+
+          <li>
+            <button
+              onClick={() => handlePageChange(pagination.totalPages)}
+              disabled={pagination.currentPage >= pagination.totalPages}
+              className={` ${
+                pagination.currentPage >= pagination.totalPages ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              <Icon icon="heroicons:chevron-double-right-solid" />
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default DynamicTableBody;

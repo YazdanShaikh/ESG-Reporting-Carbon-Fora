@@ -1,0 +1,10 @@
+export const operatingCountries = ['Pakistan', 'UAE', 'Both'];
+export const organizationType = ['Private', 'Public', 'Listed', 'SME'];
+export const employeeCount = ['1–50', '51–250', '251–1000', '1000+'];
+export const useFuels = ['Diesel', 'Petrol', 'Natural Gas', 'LPG', 'None'];
+export const fuelUsageUnit = ['Liters', 'kWh'];
+export const useRenewableEnergy = ['Yes', 'No', 'Not Sure'];
+export const trackingFrequency = ['Annually', 'Quarterly'];
+export const trackPerformanceOverTime = ['Yes, show me trends', 'No, just the snapshot'];
+export const yesNoOptions = ['Yes', 'No'];
+export const businessSectors = ["Manufacturing", "Services", "Retail", "Energy", "Construction", "Otherplease mention"];
