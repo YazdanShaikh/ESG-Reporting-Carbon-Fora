@@ -151,6 +151,42 @@ const SocialApproach = () => {
         })
       })
     }),
+    3: yup.object({
+      gri404: yup.object({
+        hasTrainingPolicies: yup.string().required(),
+        trainingDescription: yup.string().when("hasTrainingPolicies", { is: "yes", then: yup.string().required() }),
+        responsible: yup.string().required(),
+        developmentActions: yup.array().min(1, "Select at least one action"),
+        monitoring: yup.array().min(1, "Select at least one monitoring method"),
+        tracksTrainingHours: yup.string().required(),
+        trainingHoursData: yup.array().of(yup.object({
+          employeeCategory: yup.string().required(),
+          gender: yup.string().required(),
+          averageTrainingHours: yup.number().min(0)
+        })).when("tracksTrainingHours", { is: "yes", then: yup.array().min(1, "Add at least one training hours row") }),
+        trainingHoursMethodology: yup.string().when("tracksTrainingHours", { is: "yes", then: yup.string().required() }),
+        hasSkillPrograms: yup.string().required(),
+        skillPrograms: yup.array().when("hasSkillPrograms", { is: "yes", then: yup.array().min(1, "Select at least one program type") }),
+        skillProgramsDescription: yup.string().when("hasSkillPrograms", { is: "yes", then: yup.string().required() }),
+        conductsReviews: yup.string().required(),
+        reviewData: yup.array().of(yup.object({
+          employeeCategory: yup.string().required(),
+          gender: yup.string().required(),
+          reviewCoverage: yup.number().min(0).max(100)
+        })).when("conductsReviews", { is: "yes", then: yup.array().min(1, "Add at least one review row") }),
+        reviewFrequency: yup.string().when("conductsReviews", { is: "yes", then: yup.string().required() }),
+        omissionReason: yup.string().when(["tracksTrainingHours", "conductsReviews"], {
+          is: (tracksTrainingHours, conductsReviews) => [tracksTrainingHours, conductsReviews].includes("no"),
+          then: yup.string().required(),
+          otherwise: yup.string()
+        }),
+        omissionExplanation: yup.string().when(["tracksTrainingHours", "conductsReviews"], {
+          is: (tracksTrainingHours, conductsReviews) => [tracksTrainingHours, conductsReviews].includes("no"),
+          then: yup.string().required(),
+          otherwise: yup.string()
+        })
+      })
+    }),
   };
 
   const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm({
@@ -219,6 +255,24 @@ const SocialApproach = () => {
         illHealthData: [{ illHealthType: "", numberOfCases: 0 }],
         omissionReason: "",
         omissionExplanation: ""
+      },
+      gri404: {
+        hasTrainingPolicies: "no",
+        trainingDescription: "",
+        responsible: "Human Resources",
+        developmentActions: [],
+        monitoring: [],
+        tracksTrainingHours: "no",
+        trainingHoursData: [{ employeeCategory: "", gender: "Male", averageTrainingHours: 0 }],
+        trainingHoursMethodology: "LMS data",
+        hasSkillPrograms: "no",
+        skillPrograms: [],
+        skillProgramsDescription: "",
+        conductsReviews: "no",
+        reviewData: [{ employeeCategory: "", gender: "Male", reviewCoverage: 0 }],
+        reviewFrequency: "Annual",
+        omissionReason: "",
+        omissionExplanation: ""
       }
     } 
     });
@@ -231,6 +285,8 @@ const SocialApproach = () => {
   const { fields: coverageFields, append: appendCoverage } = useFieldArray({ control, name: "gri403.coverageData" });
   const { fields: injuryFields, append: appendInjury } = useFieldArray({ control, name: "gri403.injuryData" });
   const { fields: illHealthFields, append: appendIllHealth } = useFieldArray({ control, name: "gri403.illHealthData" });
+  const { fields: trainingHoursFields, append: appendTrainingHours } = useFieldArray({ control, name: "gri404.trainingHoursData" });
+  const { fields: reviewFields, append: appendReview } = useFieldArray({ control, name: "gri404.reviewData" });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -794,7 +850,7 @@ const SocialApproach = () => {
       </div>
     </div>
   );
-  //  Gri 402 LABOR / MANAGEMENT RELATIONS
+  //  Gri 402 Labor / Management Relations
   const renderGRI402 = () => (
     <div className="space-y-8 animate-fadeIn">
       <div className="bg-white p-3 rounded-md border border-gray-200">
@@ -1095,9 +1151,7 @@ const SocialApproach = () => {
   const renderGRI403 = () => (
     <div className="space-y-8 animate-fadeIn">
       <div className="bg-white p-3 rounded-md border border-gray-200">
-        <h3 className="text-lg font-bold text-[#4639AA] mb-6 flex items-center gap-2">
-          <Icon icon="mdi:shield-check" /> Occupational Health and Safety
-        </h3>
+        
         <div className="grid grid-cols-1 gap-6">
           <div>
             <InfoLabel
@@ -1195,7 +1249,7 @@ const SocialApproach = () => {
 
       <div className="bg-white p-3 rounded-md border border-gray-200">
         <h3 className="text-lg font-bold text-[#4639AA] mb-4 flex items-center gap-2">
-          <Icon icon="mdi:clipboard-check" /> OHS Management System & Processes
+          <Icon icon="mdi:clipboard-check" /> Occupational Health and Safety Management System
         </h3>
         <div className="space-y-4">
           <div>
@@ -1239,6 +1293,10 @@ const SocialApproach = () => {
               </div>
             </div>
           )}
+
+          <h3 className="text-lg font-bold text-[#4639AA] mb-6 flex items-center gap-2">
+            <Icon icon="mdi:shield-check" /> Hazard Identification, Risk Assessment, and Incident Investigation
+          </h3>
 
           <div>
             <InfoLabel
@@ -1294,6 +1352,10 @@ const SocialApproach = () => {
             </div>
           )}
 
+          <h3 className="text-lg font-bold text-[#4639AA] mb-6 flex items-center gap-2">
+            <Icon icon="mdi:shield-check" /> Occupational Health Services
+          </h3>
+
           <div>
             <InfoLabel
               label="Q9. Are occupational health services provided to workers?"
@@ -1335,6 +1397,10 @@ const SocialApproach = () => {
               </div>
             </div>
           )}
+
+          <h3 className="text-lg font-bold text-[#4639AA] mb-6 flex items-center gap-2">
+            <Icon icon="mdi:shield-check" /> Worker Participation, Consultation, and Communication on OHS
+          </h3>
 
           <div>
             <InfoLabel
@@ -1382,7 +1448,7 @@ const SocialApproach = () => {
 
       <div className="bg-white p-3 rounded-md border border-gray-200">
         <h3 className="text-lg font-bold text-[#4639AA] mb-4 flex items-center gap-2">
-          <Icon icon="mdi:briefcase-check" /> Training, Health & Business Relationships
+          <Icon icon="mdi:briefcase-check" /> Worker Training on OHS
         </h3>
         <div className="space-y-4">
           <div>
@@ -1461,6 +1527,10 @@ const SocialApproach = () => {
             </div>
           )}
 
+          <h3 className="text-lg font-bold text-[#4639AA] mb-4 flex items-center gap-2">
+            <Icon icon="mdi:briefcase-check" /> Promotion of Worker Health
+          </h3>
+
           <div>
             <InfoLabel
               label="Q15. Are programs in place to promote worker health?"
@@ -1502,6 +1572,10 @@ const SocialApproach = () => {
               </div>
             </div>
           )}
+
+          <h3 className="text-lg font-bold text-[#4639AA] mb-4 flex items-center gap-2">
+            <Icon icon="mdi:briefcase-check" /> Prevention and Mitigation of OHS Impacts Directly Linked by Business Relationships
+          </h3>
 
           <div>
             <InfoLabel
@@ -1549,7 +1623,7 @@ const SocialApproach = () => {
 
       <div className="bg-white p-3 rounded-md border border-gray-200">
         <h3 className="text-lg font-bold text-[#4639AA] mb-4 flex items-center gap-2">
-          <Icon icon="mdi:chart-line" /> Coverage, Injuries & Ill Health
+          <Icon icon="mdi:chart-line" /> Workers Covered by an OHS Management System
         </h3>
         <div className="space-y-4">
           <div>
@@ -1637,6 +1711,10 @@ const SocialApproach = () => {
             </div>
           )}
 
+          <h3 className="text-lg font-bold text-[#4639AA] mb-4 flex items-center gap-2">
+            <Icon icon="mdi:chart-line" /> Work-Related Injuries
+          </h3>
+
           <div>
             <InfoLabel
               label="Q21. Does the organization record work-related injuries?"
@@ -1703,6 +1781,10 @@ const SocialApproach = () => {
               </button>
             </div>
           )}
+
+          <h3 className="text-lg font-bold text-[#4639AA] mb-4 flex items-center gap-2">
+            <Icon icon="mdi:chart-line" /> Work-Related Ill Health
+          </h3>
 
           <div>
             <InfoLabel
@@ -1809,9 +1891,424 @@ const SocialApproach = () => {
       </div>
     </div>
   );
-  //  Gri 404
+  //  Gri 404 TRAINING AND EDUCATION
   const renderGRI404 = () => (
     <div className="space-y-8 animate-fadeIn">
+      <div className="bg-white p-3 rounded-md border border-gray-200">
+        <h3 className="text-lg font-bold text-[#4639AA] mb-6 flex items-center gap-2">
+          <Icon icon="mdi:book-open-variant" /> Training and Education
+        </h3>
+        <div className="grid grid-cols-1 gap-6">
+          <div>
+            <InfoLabel
+              label="Q1. Does the organization have policies or practices related to employee training and education?"
+              info="Select Yes if your company has any system or usual way of training employees or improving their skills (formal or informal)."
+            />
+            <div className="flex gap-4">
+              {["yes", "no"].map((opt) => (
+                <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    value={opt}
+                    {...register("gri404.hasTrainingPolicies")}
+                    className="w-4 h-4 text-[#4639AA] focus:ring-[#4639AA]"
+                  />
+                  <span className="capitalize text-sm text-gray-700">{opt}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {watch("gri404.hasTrainingPolicies") === "yes" && (
+            <div>
+              <InfoLabel
+                label="Brief description of policies or practices"
+                info="Briefly describe how your company provides training or learning opportunities to employees."
+              />
+              <textarea
+                {...register("gri404.trainingDescription")}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#4639AA] min-h-[120px]"
+                placeholder="Describe training and education policies..."
+              />
+            </div>
+          )}
+
+          <div>
+            <InfoLabel
+              label="Q2. Who is responsible for managing training and education–related impacts?"
+              info="Select the person or department responsible for employee training, learning, and skill development."
+            />
+            <select
+              {...register("gri404.responsible")}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#4639AA] bg-white text-sm"
+            >
+              <option>Human Resources</option>
+              <option>Learning & Development function</option>
+              <option>Senior management</option>
+              <option>Local management</option>
+              <option>Sustainability team</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div>
+            <InfoLabel
+              label="Q3. What actions are taken to support employee training and development?"
+              info="Select all types of training or development your company provides to employees."
+            />
+            <div className="flex flex-wrap gap-4">
+              {["Technical skills training", "Leadership development programs", "Health, safety, or compliance training", "Digital or e-learning programs", "Tuition assistance or scholarships", "Other"].map((action) => (
+                <label key={action} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    value={action}
+                    {...register("gri404.developmentActions")}
+                    className="w-4 h-4 text-[#4639AA]"
+                  />
+                  <span className="text-sm">{action}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <InfoLabel
+              label="Q4. How does the organization monitor training and education performance?"
+              info="Select how you track training activities, such as hours, systems, employee reviews, or feedback. Select 'Not monitored' if nothing is tracked."
+            />
+            <div className="flex flex-wrap gap-4">
+              {["Training hours tracking", "Learning management systems (LMS)", "Employee performance reviews", "Employee feedback or surveys", "Not monitored"].map((method) => (
+                <label key={method} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    value={method}
+                    {...register("gri404.monitoring")}
+                    className="w-4 h-4 text-[#4639AA]"
+                  />
+                  <span className="text-sm">{method}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white p-3 rounded-md border border-gray-200">
+        <h3 className="text-lg font-bold text-[#4639AA] mb-4 flex items-center gap-2">
+          <Icon icon="mdi:chart-bar" /> Average Hours of Training per Year per Employee
+        </h3>
+        <div className="space-y-4">
+          <div>
+            <InfoLabel
+              label="Q5. Does the organization track training hours provided to employees?"
+              info="Select Yes if your company records how many hours of training employees receive."
+            />
+            <div className="flex gap-4">
+              {["yes", "no"].map((opt) => (
+                <label key={opt} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value={opt}
+                    {...register("gri404.tracksTrainingHours")}
+                    className="w-4 h-4 text-[#4639AA]"
+                  />
+                  <span className="capitalize text-sm">{opt}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {watch("gri404.tracksTrainingHours") === "yes" && (
+            <>
+              <div>
+                <InfoLabel
+                  label="Q6. Provide average training hours per employee during the reporting period."
+                  info="Enter average number of training hours per employee during the year, broken down by category and gender."
+                />
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left border-collapse border border-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="p-2 border border-gray-200">Employee category</th>
+                        <th className="p-2 border border-gray-200">Gender</th>
+                        <th className="p-2 border border-gray-200">Average training hours</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {trainingHoursFields.map((item, idx) => (
+                        <tr key={item.id}>
+                          <td className="p-1 border border-gray-200">
+                            <input
+                              {...register(`gri404.trainingHoursData.${idx}.employeeCategory`)}
+                              className="w-full p-1 border-none outline-none"
+                              placeholder="e.g. Office staff"
+                            />
+                          </td>
+                          <td className="p-1 border border-gray-200">
+                            <select
+                              {...register(`gri404.trainingHoursData.${idx}.gender`)}
+                              className="w-full p-1 border-none outline-none bg-transparent"
+                            >
+                              <option>Male</option>
+                              <option>Female</option>
+                              <option>Other</option>
+                            </select>
+                          </td>
+                          <td className="p-1 border border-gray-200">
+                            <input
+                              type="number"
+                              {...register(`gri404.trainingHoursData.${idx}.averageTrainingHours`)}
+                              className="w-full p-1 border-none outline-none"
+                              placeholder="0"
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => appendTrainingHours({ employeeCategory: "", gender: "Male", averageTrainingHours: 0 })}
+                  className="text-xs text-[#4639AA] font-bold"
+                >
+                  + Add Row
+                </button>
+              </div>
+              <div>
+                <InfoLabel
+                  label="Q7. What methodology is used to calculate training hours?"
+                  info="Select how you calculate training hours (e.g., system records, attendance sheets, or estimates)."
+                />
+                <select
+                  {...register("gri404.trainingHoursMethodology")}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#4639AA] bg-white text-sm"
+                >
+                  <option>LMS data</option>
+                  <option>HR records</option>
+                  <option>Training attendance logs</option>
+                  <option>Estimates</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {watch("gri404.tracksTrainingHours") === "no" && (
+            <div className="mt-4 bg-[#4639AA]/5 border border-[#4639AA]/15 p-4 rounded-xl">
+              <h4 className="text-sm font-bold text-[#4639AA] mb-3">Omission Logic (GRI 404-1)</h4>
+              <p className="text-xs text-gray-600">Training hours are not tracked or not available.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-white p-3 rounded-md border border-gray-200">
+        <h3 className="text-lg font-bold text-[#4639AA] mb-4 flex items-center gap-2">
+          <Icon icon="mdi:account-cog" /> Programs for Upgrading Employee Skills and Transition Assistance Programs
+        </h3>
+        <div className="space-y-4">
+          <div>
+            <InfoLabel
+              label="Q8. Are programs in place to upgrade employee skills?"
+              info="Select Yes if your company provides programs to improve employee skills or help them grow in their careers."
+            />
+            <div className="flex gap-4">
+              {["yes", "no"].map((opt) => (
+                <label key={opt} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value={opt}
+                    {...register("gri404.hasSkillPrograms")}
+                    className="w-4 h-4 text-[#4639AA]"
+                  />
+                  <span className="capitalize text-sm">{opt}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {watch("gri404.hasSkillPrograms") === "yes" && (
+            <>
+              <div>
+                <InfoLabel
+                  label="Q9. What types of skill development or transition programs are offered?"
+                  info="Select all programs your company offers to improve skills or support employees in career changes."
+                />
+                <div className="flex flex-wrap gap-4">
+                  {["Reskilling or upskilling programs", "Career development planning", "Mentoring or coaching", "Redeployment or transition support", "Retirement preparation programs", "Other"].map((program) => (
+                    <label key={program} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        value={program}
+                        {...register("gri404.skillPrograms")}
+                        className="w-4 h-4 text-[#4639AA]"
+                      />
+                      <span className="text-sm">{program}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <InfoLabel
+                  label="Q10. Describe how these programs support long-term employability."
+                  info="Briefly explain how these programs help employees stay employable, improve skills, or grow in their careers."
+                />
+                <textarea
+                  {...register("gri404.skillProgramsDescription")}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#4639AA] min-h-[120px]"
+                  placeholder="Describe the impact of skill development programs..."
+                />
+              </div>
+            </>
+          )}
+
+          {watch("gri404.hasSkillPrograms") === "no" && (
+            <div className="mt-4 bg-[#4639AA]/5 border border-[#4639AA]/15 p-4 rounded-xl">
+              <h4 className="text-sm font-bold text-[#4639AA] mb-3">Not applicable (GRI 404-2)</h4>
+              <p className="text-xs text-gray-600">No skill development programs are currently offered.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-white p-3 rounded-md border border-gray-200">
+        <h3 className="text-lg font-bold text-[#4639AA] mb-4 flex items-center gap-2">
+          <Icon icon="mdi:account-check" /> Percentage of Employees Receiving Regular Performance and Career Development Reviews
+        </h3>
+        <div className="space-y-4">
+          <div>
+            <InfoLabel
+              label="Q11. Does the organization conduct regular performance and career development reviews?"
+              info="Select Yes if employees are regularly evaluated on their performance and career progress."
+            />
+            <div className="flex gap-4">
+              {["yes", "no"].map((opt) => (
+                <label key={opt} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value={opt}
+                    {...register("gri404.conductsReviews")}
+                    className="w-4 h-4 text-[#4639AA]"
+                  />
+                  <span className="capitalize text-sm">{opt}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {watch("gri404.conductsReviews") === "yes" && (
+            <>
+              <div>
+                <InfoLabel
+                  label="Q12. Provide data on employees receiving performance and career development reviews."
+                  info="Enter percentage of employees who received performance or career reviews during the year."
+                />
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left border-collapse border border-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="p-2 border border-gray-200">Employee category</th>
+                        <th className="p-2 border border-gray-200">Gender</th>
+                        <th className="p-2 border border-gray-200">% receiving reviews</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reviewFields.map((item, idx) => (
+                        <tr key={item.id}>
+                          <td className="p-1 border border-gray-200">
+                            <input
+                              {...register(`gri404.reviewData.${idx}.employeeCategory`)}
+                              className="w-full p-1 border-none outline-none"
+                              placeholder="e.g. Operations"
+                            />
+                          </td>
+                          <td className="p-1 border border-gray-200">
+                            <select
+                              {...register(`gri404.reviewData.${idx}.gender`)}
+                              className="w-full p-1 border-none outline-none bg-transparent"
+                            >
+                              <option>Male</option>
+                              <option>Female</option>
+                              <option>Other</option>
+                            </select>
+                          </td>
+                          <td className="p-1 border border-gray-200">
+                            <input
+                              type="number"
+                              {...register(`gri404.reviewData.${idx}.reviewCoverage`)}
+                              className="w-full p-1 border-none outline-none"
+                              placeholder="0"
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => appendReview({ employeeCategory: "", gender: "Male", reviewCoverage: 0 })}
+                  className="text-xs text-[#4639AA] font-bold"
+                >
+                  + Add Row
+                </button>
+              </div>
+              <div>
+                <InfoLabel
+                  label="Q13. How often are performance and career development reviews conducted?"
+                  info="Select how often employee performance reviews are done in your company."
+                />
+                <select
+                  {...register("gri404.reviewFrequency")}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#4639AA] bg-white text-sm"
+                >
+                  <option>Annual</option>
+                  <option>Biannual</option>
+                  <option>Quarterly</option>
+                  <option>Ad hoc</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {(watch("gri404.tracksTrainingHours") === "no" || watch("gri404.conductsReviews") === "no") && (
+            <div className="mt-4 bg-[#4639AA]/5 border border-[#4639AA]/15 p-4 rounded-xl">
+              <h4 className="text-sm font-bold text-[#4639AA] mb-3">Omission Logic (GRI 404)</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <InfoLabel
+                    label="Reason for omission"
+                    info="If you cannot provide required data, select the closest reason."
+                  />
+                  <select
+                    {...register("gri404.omissionReason")}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#4639AA] bg-white text-sm"
+                  >
+                    <option value="">Select reason</option>
+                    <option value="Data not tracked">Data not tracked</option>
+                    <option value="Systems not in place">Systems not in place</option>
+                    <option value="Legal restriction">Legal restriction</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <InfoLabel
+                    label="Explanation (mandatory)"
+                    info="Provide a brief explanation why the data is omitted."
+                  />
+                  <textarea
+                    {...register("gri404.omissionExplanation")}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#4639AA] min-h-[100px]"
+                    placeholder="e.g. Training hours are not tracked in our current system..."
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
   //  Gri 405
