@@ -136,22 +136,22 @@ export default function DocumentImportSection({
       } ${className}`}
     >
       <div className="flex items-start gap-3 mb-4">
-        <div className="rounded-full bg-white/15 p-2.5">
+        {/* <div className="rounded-full bg-white/15 p-2.5">
           <Icon icon="mdi:file-document-outline" className="text-2xl text-white" />
-        </div>
+        </div> */}
         <div className="text-left">
-          <h2
+          {/* <h2
             className={`font-bold text-white ${isWelcome ? "text-lg md:text-xl" : "text-base"}`}
           >
             Autofill from documents
-          </h2>
-          <p className="text-sm text-white/75 mt-1 leading-snug">
+          </h2> */}
+          {/* <p className="text-sm text-white/75 mt-1 leading-snug">
             Upload your{" "}
             <strong className="text-white/90">certificate of registration</strong>{" "}
             (PDF or image) and{" "}
             <strong className="text-white/90">HR Staff Headcount</strong> (Excel).
             We extract text and map it to this questionnaire, you stay in control and can edit anything.
-          </p>
+          </p> */}
         </div>
       </div>
 

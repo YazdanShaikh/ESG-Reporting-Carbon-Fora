@@ -441,14 +441,14 @@ const WrittenPoliciesMultiSelect = ({ label, info, options, selected, onChange }
                 {/* STEP 1 — COMPANY PROFILE */}
                 {step === 0 && (
                   <div className="space-y-6">
-                    <DocumentImportSection
+                    {/* <DocumentImportSection
                       variant="compact"
                       countryNames={COUNTRIES}
                       onExtractComplete={({ patch }) => {
                         setFormData((prev) => ({ ...prev, ...patch }));
                       }}
                       className="mb-2"
-                    />
+                    /> */}
                     <div className="space-y-1 mb-2">
                       <label className="text-2xl font-bold text-white flex items-center gap-2">
                         Basic Company Details
