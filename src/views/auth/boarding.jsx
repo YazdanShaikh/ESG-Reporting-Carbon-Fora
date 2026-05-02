@@ -10,6 +10,7 @@ import { Icon } from "@iconify/react";
 import { toast } from "react-toastify";
 import { submitOnboarding, getOnboarding } from "../../services/onboarding.service";
 import CountryMultiSelect from "../../components/partials/CountryMultiSelect";
+import DocumentImportSection from "../../components/onboarding/DocumentImportSection";
 import { handleError } from "../../utils/functions";
 import {
   operatingCountries,
@@ -44,6 +45,7 @@ const Boarding = () => {
     legalName: "",
     operatingCountries: [],
     sector: "Manufacturing",
+    sectorOther: "",
     organizationType: "",
     employeeCount: "",
     website: "",
@@ -133,6 +135,7 @@ const Boarding = () => {
             fuelTypes: res.data.fuelTypes || [],
             writtenPolicies: res.data.writtenPolicies || [],
             esgObjectives: res.data.esgObjectives || [],
+            sectorOther: res.data.sectorOther ?? prev.sectorOther ?? "",
           }));
         }
       } catch (error) {
@@ -350,15 +353,29 @@ const WrittenPoliciesMultiSelect = ({ label, info, options, selected, onChange }
             <p className="mt-3 text-white/80 max-w-xl mx-auto">
               CarbonFora will guide you step-by-step to generate your ESG score & insights.
             </p>
-            {/* <img src={Val} alt="Val" className="w-24 md:w-64 mx-auto my-6" /> */}
-            {/* Footer Buttons */}
-            <div className="mt-10 flex justify-center gap-4">
+
+            <div className="mt-8 max-w-2xl mx-auto w-full text-left">
+              <DocumentImportSection
+                variant="welcome"
+                countryNames={COUNTRIES}
+                onExtractComplete={({ patch }) => {
+                  setFormData((prev) => ({ ...prev, ...patch }));
+                  setStarted(true);
+                }}
+              />
+            </div>
+
+            <div className="mt-8 flex flex-col items-center gap-3">
               <button
+                type="button"
                 onClick={() => setStarted(true)}
-                className="px-10 py-3 rounded-full bg-white text-[#4639AA] font-semibold text-lg hover:scale-105 transition"
+                className="px-10 py-3 rounded-full border-2 border-white/80 text-white font-semibold text-lg hover:bg-white/10 transition"
               >
-                Let’s Get Started →
+                Continue Without Documents, Fill Manually →
               </button>
+              <p className="text-white/60 text-sm max-w-md text-center">
+                You can also import documents later from the first step of the questionnaire.
+              </p>
             </div>
           </div>
           <div className="absolute  z-10">
@@ -424,6 +441,14 @@ const WrittenPoliciesMultiSelect = ({ label, info, options, selected, onChange }
                 {/* STEP 1 — COMPANY PROFILE */}
                 {step === 0 && (
                   <div className="space-y-6">
+                    {/* <DocumentImportSection
+                      variant="compact"
+                      countryNames={COUNTRIES}
+                      onExtractComplete={({ patch }) => {
+                        setFormData((prev) => ({ ...prev, ...patch }));
+                      }}
+                      className="mb-2"
+                    /> */}
                     <div className="space-y-1 mb-2">
                       <label className="text-2xl font-bold text-white flex items-center gap-2">
                         Basic Company Details
