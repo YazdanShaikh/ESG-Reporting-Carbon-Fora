@@ -29,6 +29,11 @@ export const menuItems = [
     icon: "carbon:material-request",
     link: "/dashboard/material",
   },
+  {
+    title: "Social Disclosures",
+    icon: "carbon:material-request",
+    link: "/dashboard/social",
+  },
   // {
   //   title: "GRI Standards",
   //   icon: "clarity:info-standard-line",

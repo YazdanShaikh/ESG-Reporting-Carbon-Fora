@@ -38,6 +38,12 @@ const dashboardRoutes = [
     index: true,
     key: "material-topics",
   },
+  {
+    path: "social",
+    Element: lazy(() => import("@/views/dashboard/social")),
+    index: true,
+    key: "social-topics",
+  },
 
   // {
   //   path: "gri-standards",
